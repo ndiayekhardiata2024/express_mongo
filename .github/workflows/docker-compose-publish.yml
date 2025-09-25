@@ -36,7 +36,7 @@ jobs:
       - name: Build and push backend
         uses: docker/build-push-action@v4
         with:
-          context: ./mon_projet_Express
+          context: ./mon-projet-Express
           file: ./mon_projet_Express/Dockerfile
           push: true
           tags: ndiaye2024/backend:latest
