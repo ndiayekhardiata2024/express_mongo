@@ -1,5 +1,5 @@
 pipeline {
-    agent any  // Exécute sur l'agent disponible, ici ton container Jenkins
+    agent any
 
     environment {
         // Nom d'utilisateur Docker Hub
@@ -7,73 +7,58 @@ pipeline {
     }
 
     stages {
-        // -----------------------------
+        stage('Checkout code') {
+            steps {
+                // On clone le repo public depuis GitHub
+                git branch: 'main',
+                    url: 'https://github.com/ndiayekhardiata2024/express_mongo.git'
+            }
+        }
+
         stage('Build Backend Image') {
             steps {
-                // Construction de l'image backend
-                // ./mon-projet-express doit contenir le Dockerfile backend
-                sh """
-                    echo '🔹 Construction de l image backend...'
-                    docker build -t ${DOCKERHUB_USER}/backend:latest ./mon-projet-express
-                """
+                // Dockerfile backend dans ./mon-projet-express
+                sh "docker build -t ${DOCKERHUB_USER}/backend:latest ./mon-projet-express"
             }
         }
 
-        // -----------------------------
         stage('Build Frontend Image') {
             steps {
-                // Construction de l'image frontend
-                // Dockerfile frontend doit être à la racine
-                sh """
-                    echo '🔹 Construction de l image frontend...'
-                    docker build -t ${DOCKERHUB_USER}/frontend:latest ./
-                """
+                // Dockerfile frontend à la racine
+                sh "docker build -t ${DOCKERHUB_USER}/frontend:latest ./"
             }
         }
 
-        // -----------------------------
         stage('Login to Docker Hub') {
             steps {
-                // On récupère le token stocké dans Jenkins Credentials
+                // On utilise le secret text Jenkins pour Docker Hub
                 withCredentials([string(credentialsId: 'jenkinsauto', variable: 'DOCKERHUB_TOKEN')]) {
-                    sh """
-                        echo '🔹 Connexion à Docker Hub...'
-                        echo $DOCKERHUB_TOKEN | docker login -u ${DOCKERHUB_USER} --password-stdin
-                    """
+                    sh "echo $DOCKERHUB_TOKEN | docker login -u ${DOCKERHUB_USER} --password-stdin"
                 }
             }
         }
 
-        // -----------------------------
         stage('Push Images to Docker Hub') {
             steps {
-                sh """
-                    echo '🔹 Push backend...'
-                    docker push ${DOCKERHUB_USER}/backend:latest
-                    echo '🔹 Push frontend...'
-                    docker push ${DOCKERHUB_USER}/frontend:latest
-                """
+                sh "docker push ${DOCKERHUB_USER}/backend:latest"
+                sh "docker push ${DOCKERHUB_USER}/frontend:latest"
             }
         }
 
-        // -----------------------------
         stage('Deploy with Docker Compose') {
             steps {
-                sh """
-                    echo '🔹 Déploiement via Docker Compose...'
-                    docker compose -f docker-compose.yml up -d
-                """
+                // On déploie les containers avec Docker Compose
+                sh "docker compose -f docker-compose.yml up -d"
             }
         }
     }
 
-    // -----------------------------
     post {
         success {
-            echo '✅ Déploiement terminé avec succès !'
+            echo '✅ Déploiement réussi !'
         }
         failure {
-            echo '❌ Échec du pipeline ! Vérifie les logs.'
+            echo '❌ Échec du pipeline'
         }
     }
 }
