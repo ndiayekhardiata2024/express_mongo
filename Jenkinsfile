@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'alpine/git'  // image légère avec Git installé
+            image 'alpine/git' // image légère avec Git installé
             args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
@@ -11,22 +11,17 @@ pipeline {
     }
 
     stages {
-        stage('Checkout code') {
-            steps {
-                // Clonage manuel du dépôt GitHub
-                sh 'git clone -b main https://github.com/ndiayekhardiata2024/express_mongo.git'
-            }
-        }
-
         stage('Build Backend Image') {
             steps {
-                sh "docker build -t ${DOCKERHUB_USER}/backend:latest ./express_mongo/mon-projet-express"
+                // Dockerfile backend dans ./mon-projet-express
+                sh "docker build -t ${DOCKERHUB_USER}/backend:latest ./mon-projet-express"
             }
         }
 
         stage('Build Frontend Image') {
             steps {
-                sh "docker build -t ${DOCKERHUB_USER}/frontend:latest ./express_mongo"
+                // Dockerfile frontend à la racine
+                sh "docker build -t ${DOCKERHUB_USER}/frontend:latest ./"
             }
         }
 
@@ -47,7 +42,7 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             steps {
-                sh "docker compose -f express_mongo/docker-compose.yml up -d"
+                sh "docker compose -f docker-compose.yml up -d"
             }
         }
     }
