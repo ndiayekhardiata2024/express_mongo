@@ -7,27 +7,29 @@ pipeline {
     }
 
     environment {
-        GITHUB_CREDENTIALS = credentials('jenkins-ci')
+        GITHUB_CREDENTIALS = credentials('jenkins-ci')  // si tu utilises un token GitHub
         DOCKERHUB_USER = 'ndiaye2024'
     }
 
     stages {
         stage('Checkout code') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/ndiayekhardiata2024/express_mongo.git'
+                // Clonage manuel dans le workspace
+                sh 'git clone -b main https://github.com/ndiayekhardiata2024/express_mongo.git'
             }
         }
 
         stage('Build Backend Image') {
             steps {
-                sh "docker build -t ${DOCKERHUB_USER}/backend:latest ./mon-projet-express"
+                // Dockerfile backend dans ./express_mongo/mon-projet-express
+                sh "docker build -t ${DOCKERHUB_USER}/backend:latest ./express_mongo/mon-projet-express"
             }
         }
 
         stage('Build Frontend Image') {
             steps {
-                sh "docker build -t ${DOCKERHUB_USER}/frontend:latest ./"
+                // Dockerfile frontend à la racine du dépôt
+                sh "docker build -t ${DOCKERHUB_USER}/frontend:latest ./express_mongo"
             }
         }
 
@@ -48,7 +50,8 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             steps {
-                sh "docker compose -f docker-compose.yml up -d"
+                // Le fichier docker-compose.yml doit être dans ./express_mongo
+                sh "docker compose -f express_mongo/docker-compose.yml up -d"
             }
         }
     }
