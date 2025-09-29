@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'alpine/git' // image légère avec Git installé
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
     environment {
         DOCKERHUB_USER = 'ndiaye2024'
