@@ -1,63 +1,65 @@
 pipeline {
-    agent {
-        docker {
-            image 'docker:latest'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
     environment {
-        GITHUB_CREDENTIALS = credentials('github-jenkins')
-        DOCKERHUB_USER = 'ndiaye2024'
+        DOCKER_HUB_USER = 'ndiaye2024'
+        DOCKER_HUB_PASS = credentials('Hub-Jenkins') // à créer dans Jenkins
+        DOCKER_HUB_REPO = 'ndiaye2024'
     }
 
     stages {
-        stage('Checkout code') {
+        stage('Checkout') {
             steps {
-                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'github-jenkins', url: 'https://github.com/ndiayekhardiata2024/express_mongo.git']])
+                git branch: 'main', url: 'https://github.com/ndiayekhardiata2024/express_mongo.git'
             }
         }
 
         stage('Build Backend Image') {
             steps {
-                sh "docker build -t ${DOCKERHUB_USER}/backend:latest ./mon-projet-express"
+                script {
+                    sh 'docker build -t $DOCKER_HUB_REPO/backend:latest ./mon-projet-express'
+                }
             }
         }
 
         stage('Build Frontend Image') {
             steps {
-                sh "docker build -t ${DOCKERHUB_USER}/frontend:latest ./"
-            }
-        }
-
-        stage('Login to Docker Hub') {
-            steps {
-                withCredentials([string(credentialsId: 'jenkinsauto', variable: 'DOCKERHUB_TOKEN')]) {
-                    sh "echo $DOCKERHUB_TOKEN | docker login -u ${DOCKERHUB_USER} --password-stdin"
+                script {
+                    sh 'docker build -t $DOCKER_HUB_REPO/frontend:latest ./'
                 }
             }
         }
 
-        stage('Push Images to Docker Hub') {
+        stage('Login to DockerHub') {
             steps {
-                sh "docker push ${DOCKERHUB_USER}/backend:latest"
-                sh "docker push ${DOCKERHUB_USER}/frontend:latest"
+                script {
+                    sh "echo $DOCKER_HUB_PASS | docker login -u $DOCKER_HUB_USER --password-stdin"
+                }
+            }
+        }
+
+        stage('Push Images') {
+            steps {
+                script {
+                    sh 'docker push $DOCKER_HUB_REPO/backend:latest'
+                    sh 'docker push $DOCKER_HUB_REPO/frontend:latest'
+                }
             }
         }
 
         stage('Deploy with Docker Compose') {
             steps {
-                sh "docker compose -f docker-compose.yml up -d"
+                script {
+                    sh 'docker compose down || true'
+                    sh 'docker compose up -d'
+                }
             }
         }
     }
 
     post {
-        success {
-            echo '✅ Déploiement réussi !'
-        }
-        failure {
-            echo '❌ Échec du pipeline'
+        always {
+            sh 'docker logout'
         }
     }
 }
