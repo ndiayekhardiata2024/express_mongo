@@ -7,15 +7,14 @@ pipeline {
     }
 
     environment {
-        GITHUB_CREDENTIALS = credentials('jenkins-ci')
+        GITHUB_CREDENTIALS = credentials('github-jenkins')
         DOCKERHUB_USER = 'ndiaye2024'
     }
 
     stages {
         stage('Checkout code') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/ndiayekhardiata2024/express_mongo.git'
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'github-jenkins', url: 'https://github.com/ndiayekhardiata2024/express_mongo.git']])
             }
         }
 
