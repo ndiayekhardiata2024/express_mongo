@@ -7,7 +7,7 @@ Elle permet de gérer une collection de **smartphones** avec un **CRUD complet**
 Le projet inclut un **middleware de sécurité** pour protéger la suppression de données sensibles.
 
 ---
-
+mais
 ## 📂 Structure du projet
 
 mon-projet-express/
