@@ -61,16 +61,19 @@ pipeline {
             sh 'docker logout'
         }
         success {
-            echo "✅ Bloc success exécuté — tentative d'envoi d'email"
-            emailext subject: "✅ Build réussi : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                     body: "Le build a réussi.\nVoir les détails ici : ${env.BUILD_URL}",
-                     to: 'ndiayekhardiata2024@gmail.com'
+            script {
+              emailext subject: "✅ Build réussi : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                       body: "Le build a réussi.\nVoir les détails ici : ${env.BUILD_URL}",
+                       to: 'ndiayekhardiata2024@gmail.com'
+        }
         }
         failure {
-            emailext subject: "❌ Build échoué : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                     body: "Le build a échoué.\nVoir les logs ici : ${env.BUILD_URL}",
-                     to: 'ndiayekhardiata2024@gmail.com'
+            script {
+              emailext subject: "❌ Build échoué : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                       body: "Le build a échoué.\nVoir les logs ici : ${env.BUILD_URL}",
+                       to: 'ndiayekhardiata2024@gmail.com'
         }
+    }
     }
 } // 👈 cette accolade ferme le pipeline
 
