@@ -56,48 +56,23 @@ pipeline {
             }
         }
     }
-
-    
     post {
         always {
             sh 'docker logout'
         }
-
         success {
-            emailext (
-                subject: "✅ Build réussi : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                <h2>Build réussi 🎉</h2>
-                <p>Le job <b>${env.JOB_NAME}</b> (build #${env.BUILD_NUMBER}) s’est terminé avec succès.</p>
-                <p>🔗 <a href="${env.BUILD_URL}">Voir les détails dans Jenkins</a></p>
-                """,
-                to: "ndiayekhardiata2024@gmail.com"
-            )
+            emailext subject: "✅ Build réussi : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                     body: "Le build a réussi.\nVoir les détails ici : ${env.BUILD_URL}",
+                     to: 'ndiayekhardiata2024@gmail.com'
         }
-
         failure {
-            emailext (
-                subject: "❌ Build échoué : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                <h2>Échec du build 🚨</h2>
-                <p>Le job <b>${env.JOB_NAME}</b> a échoué.</p>
-                <p>Vérifie les logs ici :</p>
-                <p>🔗 <a href="${env.BUILD_URL}">Consulter le build</a></p>
-                """,
-                to: "ndiayekhardiata2024@gmail.com"
-            )
+            emailext subject: "❌ Build échoué : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                     body: "Le build a échoué.\nVoir les logs ici : ${env.BUILD_URL}",
+                     to: 'ndiayekhardiata2024@gmail.com'
         }
+    }
+} // 👈 cette accolade ferme le pipeline
 
-        unstable {
-            emailext (
-                subject: "⚠️ Build instable : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                <h2>Build instable ⚠️</h2>
-                <p>Le job <b>${env.JOB_NAME}</b> est terminé, mais certains tests ont échoué.</p>
-                <p>🔗 <a href="${env.BUILD_URL}">Voir les détails</a></p>
-                """,
-                to: "ndiayekhardiata2024@gmail.com"
-            )
-        }
-    }  
-}
+
+    
+   
