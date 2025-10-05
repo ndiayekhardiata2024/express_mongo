@@ -57,13 +57,12 @@ pipeline {
         }
     }
 
+    
     post {
         always {
             sh 'docker logout'
         }
-    }
 
-     post {
         success {
             emailext (
                 subject: "✅ Build réussi : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
@@ -100,5 +99,5 @@ pipeline {
                 to: "ndiayekhardiata2024@gmail.com"
             )
         }
-    }   
+    }  
 }
